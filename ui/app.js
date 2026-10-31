@@ -937,7 +937,7 @@ RENDER.accounts = (el) => {
     try { const a = await invoke("add_offline", { name: $("#offName", el).value }); await refresh(); rerender(); toast("Compte ajouté", `${a.name} (hors ligne)`); } catch (e) { fail(e); }
   };
   $("#offAdd", el).onclick = addOff;
-  $("#offName", el).onkeydown = (e) => e.key === "Enter" && addOff();
+  $("#offName", el).onkeydown = (e) => { if (e.key === "Enter") addOff(); };
   $("#msAdd", el).onclick = msLogin;
   $("#msWeb", el).onclick = msBrowserLogin;
 };

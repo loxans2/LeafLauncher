@@ -511,7 +511,7 @@ async function openLicenses() {
       return `<div class="lic-group"><div class="lic-title">${h(g.title)} <span>${items.length}</span></div>${g.note ? `<p class="muted" style="font-size:12.5px;margin:-4px 0 10px">${h(g.note)}</p>` : ""}
         <div class="lic-grid">${items.map((i) => `<button class="lic-item" data-url="${h(i.url)}" title="${h(i.detail || i.url)}"><b>${h(i.name)}${i.version ? ` <small>${h(i.version)}</small>` : ""}</b><span>${h(i.author || "—")}</span><em>${h(i.license)}</em></button>`).join("")}</div></div>`;
     }).join("") || `<div class="empty">${I.search}Aucun projet ne correspond.</div>`;
-    $$(".lic-item", body).forEach((b) => (b.onclick = () => b.dataset.url.startsWith("https://") && invoke("open_url", { url: b.dataset.url }).catch(fail)));
+    $$(".lic-item", body).forEach((b) => (b.onclick = () => { if (b.dataset.url.startsWith("https://")) invoke("open_url", { url: b.dataset.url }).catch(fail); }));
   };
   $("#licQ", body).oninput = draw;
   draw();
