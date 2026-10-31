@@ -1725,7 +1725,7 @@ dependencies = [
 
 [[package]]
 name = "leaf-launcher"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "dirs 5.0.1",
  "getrandom 0.2.17",

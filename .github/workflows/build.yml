@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Licences à jour
+        run: node tools/licenses.js --check
       - name: Tests
         run: cargo test --release
       - name: Build
@@ -32,7 +34,7 @@ jobs:
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item target/release/leaf-launcher.exe dist/LeafLauncher.exe
           if (Test-Path target/release/WebView2Loader.dll) { Copy-Item target/release/WebView2Loader.dll dist/ }
-          Copy-Item README.md, LICENSE, LICENSE-HORIZON dist/
+          Copy-Item README.md, LICENSE, LICENSE-HORIZON, THIRD_PARTY_LICENSES.md dist/
           Compress-Archive -Path dist/* -DestinationPath LeafLauncher-windows-x64.zip -Force
       - uses: actions/upload-artifact@v4
         with:

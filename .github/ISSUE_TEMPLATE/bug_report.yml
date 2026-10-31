@@ -1,0 +1,41 @@
+name: Bug
+description: Quelque chose ne marche pas comme prévu.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler ce bug. Pour une faille de sécurité, n'ouvre pas d'issue : suis SECURITY.md.
+        **Ne colle jamais de jeton, de mot de passe ou le contenu de `accounts.json`.**
+  - type: input
+    id: version
+    attributes:
+      label: Version du launcher
+      description: Réglages › À propos.
+      placeholder: "1.2.0"
+    validations:
+      required: true
+  - type: input
+    id: instance
+    attributes:
+      label: Instance
+      description: Version de Minecraft, loader et moteur.
+      placeholder: "1.21.11, Fabric, Java"
+  - type: textarea
+    id: what
+    attributes:
+      label: Ce qui se passe
+      description: Ce que tu as fait, ce que tu attendais, et ce qui s'est passé à la place.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Copie les logs de la Console du launcher (bouton Copier).
+      render: text
+  - type: input
+    id: os
+    attributes:
+      label: Système
+      placeholder: "Windows 11 24H2"

@@ -489,3 +489,30 @@ RENDER.library = async (el) => {
 };
 listen("modpack-progress", ({ payload: p }) => showTask(true, `${p.stage} · ${p.done}/${p.total}`, p.total ? (p.done / p.total) * 100 : 0));
 
+
+// ───────────────────────── Licences open source ─────────────────────────
+// La liste vient de ui/licenses.json, généré depuis le graphe de dépendances du build.
+async function openLicenses() {
+  const m = modal(`<div class="modal-head"><div><div class="eyebrow">Mentions légales</div><h2>Licences open source</h2></div><button class="btn ghost icon" data-close>${I.close}</button></div>
+    <div class="modal-body" id="licBody"><div class="center"><div class="spinner"></div></div></div>`, "wide");
+  let data;
+  try { data = await (await fetch("licenses.json")).json(); }
+  catch (e) { $("#licBody", m.el).innerHTML = `<div class="empty">${I.alert}${h(e)}</div>`; return; }
+  const body = $("#licBody", m.el);
+  body.innerHTML = `<p class="muted" style="max-width:640px">Leaf Launcher repose sur des logiciels écrits par d'autres. Chaque projet qu'il embarque ou télécharge est listé ici avec son auteur et sa licence. ${h(data.generated)}</p>
+    <div class="toolbar mt"><div class="search" style="max-width:none">${I.search}<input class="input" id="licQ" placeholder="Rechercher parmi ${data.total + 20} projets…"></div></div>
+    <div id="licGroups"></div>
+    <p class="muted mt" style="font-size:12px">Minecraft est une marque de Mojang Studios. Leaf Launcher est un projet indépendant, sans lien avec Mojang ni Microsoft.</p>`;
+  const draw = () => {
+    const q = $("#licQ", body).value.trim().toLowerCase();
+    $("#licGroups", body).innerHTML = data.groups.map((g) => {
+      const items = g.items.filter((i) => !q || [i.name, i.author, i.license].join(" ").toLowerCase().includes(q));
+      if (!items.length) return "";
+      return `<div class="lic-group"><div class="lic-title">${h(g.title)} <span>${items.length}</span></div>${g.note ? `<p class="muted" style="font-size:12.5px;margin:-4px 0 10px">${h(g.note)}</p>` : ""}
+        <div class="lic-grid">${items.map((i) => `<button class="lic-item" data-url="${h(i.url)}" title="${h(i.detail || i.url)}"><b>${h(i.name)}${i.version ? ` <small>${h(i.version)}</small>` : ""}</b><span>${h(i.author || "—")}</span><em>${h(i.license)}</em></button>`).join("")}</div></div>`;
+    }).join("") || `<div class="empty">${I.search}Aucun projet ne correspond.</div>`;
+    $$(".lic-item", body).forEach((b) => (b.onclick = () => b.dataset.url.startsWith("https://") && invoke("open_url", { url: b.dataset.url }).catch(fail)));
+  };
+  $("#licQ", body).oninput = draw;
+  draw();
+}

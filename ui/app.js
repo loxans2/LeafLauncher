@@ -1016,7 +1016,7 @@ RENDER.settings = async (el, opts = {}) => {
     </div>
     <div class="set-card glass" id="sec-about"><h3>${I.info} À propos</h3>
       <div style="padding:10px 0 4px"><img src="logo.png" alt="LeafLauncher" style="height:44px"></div>
-      <div class="set-row"><div class="txt"><b>Leaf Launcher ${h(S.version)}</b><span>Un launcher Minecraft: Java Edition open source en Rust (Tauri), bâti sur la base du launcher Horizon (MIT). Pas un produit officiel Minecraft, ni approuvé par Mojang ou Microsoft.</span></div><button class="btn" id="setHorizon">${I.globe} Horizon</button></div>
+      <div class="set-row"><div class="txt"><b>Leaf Launcher ${h(S.version)}</b><span>Un launcher Minecraft: Java Edition open source en Rust (Tauri), bâti sur la base du launcher Horizon (MIT). Pas un produit officiel Minecraft, ni approuvé par Mojang ou Microsoft.</span></div><div class="ctl"><button class="btn" id="setLicenses">${I.file} Licences open source</button><button class="btn" id="setGithub">${I.globe} GitHub</button><button class="btn ghost" id="setHorizon">Horizon</button></div></div>
     </div>
   </div></div>`;
   // Interrupteurs, champs, segments.
@@ -1034,6 +1034,8 @@ RENDER.settings = async (el, opts = {}) => {
   jp(); jobs.oninput = () => { jobsV.textContent = jobs.value; jp(); }; jobs.onchange = () => saveSettings({ download_jobs: +jobs.value });
   $("#setRefreshV", el).onclick = async () => { try { await loadManifest(true); toast("Liste à jour", `${S.manifest.versions.length} versions, dernière : ${S.manifest.latest_release}`); } catch (e) { fail(e); } };
   $("#setHorizon", el).onclick = () => invoke("open_url", { url: "https://github.com/horizon-rust/horizon" }).catch(fail);
+  $("#setGithub", el).onclick = () => invoke("open_url", { url: "https://github.com/loxans2/LeafLauncher" }).catch(fail);
+  $("#setLicenses", el).onclick = openLicenses;
   bindCommon(el);
   bindDiscordSection(el);
   bindHorizonSection(el);

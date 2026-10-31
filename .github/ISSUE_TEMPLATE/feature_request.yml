@@ -1,0 +1,16 @@
+name: Idée
+description: Propose une fonctionnalité ou une amélioration.
+labels: [idée]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ton idée
+      description: Ce que tu aimerais, et pourquoi ça t'aiderait.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Autres pistes
+      description: D'autres façons d'y arriver, ou ce que font d'autres launchers.
