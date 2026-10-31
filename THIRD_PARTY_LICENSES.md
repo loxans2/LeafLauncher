@@ -1,10 +1,10 @@
 # Licences open source
 
-Leaf Launcher 1.2.1 repose sur des logiciels écrits par d'autres. Chaque projet qu'il embarque
+Leaf Launcher 1.3.0 repose sur des logiciels écrits par d'autres. Chaque projet qu'il embarque
 ou qu'il télécharge est listé ici, avec son auteur et sa licence. Le launcher en affiche la même
 liste dans **Réglages › À propos › Licences open source**.
 
-Généré depuis le graphe de dépendances du build (cargo metadata), pas une liste écrite à la main. 252 crates Rust sont compilées dans l'exécutable.
+Généré depuis le graphe de dépendances du build (cargo metadata), pas une liste écrite à la main. 253 crates Rust sont compilées dans l'exécutable.
 
 Fichier généré par `node tools/licenses.js` : ne pas le modifier à la main.
 
@@ -25,6 +25,7 @@ Les crates que Leaf Launcher utilise directement.
 | [sysinfo 0.32.1](https://github.com/GuillaumeGomez/sysinfo) | Guillaume Gomez | MIT |
 | [tauri 2.12.5](https://github.com/tauri-apps/tauri) | Tauri Programme within The Commons Conservancy | Apache-2.0 OR MIT |
 | [ureq 2.12.1](https://github.com/algesten/ureq) | Martin Algesten, Jacob Hoffman-Andrews | MIT OR Apache-2.0 |
+| [windows 0.62.2](https://github.com/microsoft/windows-rs) | — | MIT OR Apache-2.0 |
 | [windows-sys 0.61.2](https://github.com/microsoft/windows-rs) | — | MIT OR Apache-2.0 |
 | [zip 2.6.1](https://github.com/zip-rs/zip2.git) | Mathijs van de Nes, Marli Frost | MIT |
 
@@ -144,6 +145,7 @@ Les dépendances des crates ci-dessus, compilées dans l'exécutable.
 | [hex 0.4.3](https://github.com/KokaKiwi/rust-hex) | KokaKiwi | MIT OR Apache-2.0 |
 | [html5ever 0.39.0](https://github.com/servo/html5ever) | The html5ever Project Developers | MIT OR Apache-2.0 |
 | [http 1.5.0](https://github.com/hyperium/http) | Alex Crichton, Carl Lerche | MIT OR Apache-2.0 |
+| [http-range 0.1.6](https://github.com/bancek/rust-http-range.git) | Luka Zakrajšek | MIT |
 | [ico 0.6.0](https://github.com/mdsteele/rust-ico) | Matthew D. Steele | MIT |
 | [icu_collections 2.4.0](https://github.com/unicode-org/icu4x) | The ICU4X Project Developers | Unicode-3.0 |
 | [icu_locale_core 2.4.0](https://github.com/unicode-org/icu4x) | The ICU4X Project Developers | Unicode-3.0 |
@@ -278,7 +280,6 @@ Les dépendances des crates ci-dessus, compilées dans l'exécutable.
 | [winapi-util 0.1.11](https://github.com/BurntSushi/winapi-util) | Andrew Gallant | Unlicense OR MIT |
 | [window-vibrancy 0.8.1](https://github.com/tauri-apps/tauri-plugin-vibrancy) | Tauri Programme within The Commons Conservancy | Apache-2.0 OR MIT |
 | [windows 0.57.0](https://github.com/microsoft/windows-rs) | Microsoft | MIT OR Apache-2.0 |
-| [windows 0.62.2](https://github.com/microsoft/windows-rs) | — | MIT OR Apache-2.0 |
 | [windows_x86_64_msvc 0.48.5](https://github.com/microsoft/windows-rs) | Microsoft | MIT OR Apache-2.0 |
 | [windows_x86_64_msvc 0.52.6](https://github.com/microsoft/windows-rs) | Microsoft | MIT OR Apache-2.0 |
 | [windows-collections 0.3.2](https://github.com/microsoft/windows-rs) | — | MIT OR Apache-2.0 |

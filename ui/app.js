@@ -594,6 +594,7 @@ async function createModal(pre = {}) {
         <div id="cmEngine" style="display:none"><div class="label mt">Moteur</div><div class="engine-cards">
           <button class="loader-card on" data-eng="java"><div class="li" style="background:#4ade8022;color:#4ade80">☕</div><h4>Minecraft officiel</h4><p>Le jeu Java de Mojang, avec tous ses serveurs.</p></button>
           <button class="loader-card" data-eng="horizon"><div class="li" style="background:#f9731622;color:#f97316">🦀</div><h4>Horizon (Rust)</h4><p>Minecraft 26.3 réécrit en Rust. Compte Microsoft requis.</p></button></div></div>
+        <label class="flex mt" id="cmPackWrap" style="display:none;font-size:13px;color:var(--text-2);cursor:pointer"><input type="checkbox" id="cmPack" checked> Installer le <b style="color:var(--text)">Pack Leaf Client</b> : freelook, zoom, HUD modifiable en jeu, plus de FPS</label>
         <div class="field mt" id="cmLvWrap" style="display:none"><label>Version du loader</label><select class="select" id="cmLv"></select><span class="hint" id="cmLvHint"></span></div>
       </div>
       <div class="step" data-step="2">
@@ -647,6 +648,7 @@ async function createModal(pre = {}) {
     const wrap = $("#cmLvWrap", el), sel = $("#cmLv", el), hint = $("#cmLvHint", el);
     $("#cmEngine", el).style.display = st.loader === "vanilla" && st.version === HORIZON_VERSION ? "" : "none";
     if (st.loader !== "vanilla" || st.version !== HORIZON_VERSION) st.engine = "java";
+    $("#cmPackWrap", el).style.display = ["fabric", "quilt"].includes(st.loader) ? "" : "none";
     if (st.loader === "vanilla") { wrap.style.display = "none"; st.loaderOk = true; validate(); return; }
     wrap.style.display = ""; sel.innerHTML = `<option>Chargement…</option>`; sel.disabled = true; hint.textContent = ""; st.loaderOk = false; validate();
     try {
@@ -671,8 +673,10 @@ async function createModal(pre = {}) {
       const inst = await invoke("create_instance", { instance: { name: $("#cmName", el).value, version: st.version, loader: st.loader, loader_version: st.loaderVersion, icon: st.icon, engine: st.engine } });
       S.instances.push(inst);
       await saveSettings({ selected_instance: inst.id });
+      const pack = ["fabric", "quilt"].includes(st.loader) && $("#cmPack", el)?.checked;
       m.close(); toast("Instance créée", `${inst.name} est prête. Les fichiers se téléchargent au premier lancement.`);
       go("home");
+      if (pack) installClientPack(inst);
     } catch (e) { fail(e); }
   };
   try { await loadManifest(); drawList(); } catch (e) { $("#cmList", el).innerHTML = `<div class="empty">${I.alert}${h(e)}</div>`; }
@@ -1113,7 +1117,7 @@ document.addEventListener("error", (e) => {
   try { await refresh(); } catch (e) { console.error(e); }
   loadNotes();
   go("home");
-  await sleep(Math.max(0, 1500 - (performance.now() - t0)));
+  await Promise.all([sleep(Math.max(0, 1500 - (performance.now() - t0))), window.playIntro ? window.playIntro() : null]);
   $("#splash").classList.add("done");
   if (S.preparing) showTask(true);
 })();
@@ -1135,6 +1139,8 @@ function mockInvoke(cmd, args) {
       running: [], preparing: null, installed: ["26.3", "1.21.11"], data_dir: "C:\\Users\\Joueur\\AppData\\Roaming\\LeafLauncher", total_memory_mb: 32768, version: "1.0.0",
     },
     list_versions: { latest_release: "26.3", latest_snapshot: "26.4-snapshot-1", offline: false, versions: [mk("26.4-snapshot-1", "snapshot", "2026-10-28"), mk("26.3", "release", "2026-09-30"), mk("26.2", "release", "2026-06-16"), mk("26.1", "release", "2026-03-24"), mk("1.21.11", "release", "2025-12-09"), mk("1.21.10", "release", "2025-10-07"), mk("1.20.1", "release", "2023-06-12"), mk("b1.7.3", "old_beta", "2011-07-08")] },
+    now_playing: { active: true, app: "com.hkamori.liner", app_name: "Liner", title: "Mood (feat. iann dior)", artist: "24kGoldn", album: "", playing: true, position: 82942, duration: 150341, key: "k", cover: null, apps: [{ id: "com.hkamori.liner", name: "Liner" }, { id: "Spotify.exe", name: "Spotify" }] },
+    client_pack: { installed: ["Sodium", "Freelook"], missing: [] },
     patch_notes: [], loader_versions: [{ version: "0.17.3", stable: true }, { version: "0.17.2", stable: true }],
     instance_details: { worlds: ["Nouveau monde", "Île"], mods: ["sodium.jar", "lithium.jar"], resourcepacks: [], shaderpacks: [], screenshots: 12, size: 734003200 },
     storage: { minecraft: 1.2e9, runtime: 3.1e8, instances: 7.4e8, horizon: 9e8 }, game_logs: [],

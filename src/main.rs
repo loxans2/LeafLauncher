@@ -12,6 +12,7 @@ mod forge;
 mod horizon;
 mod launch;
 mod loaders;
+mod media;
 mod modrinth;
 mod mojang;
 mod net;
@@ -805,6 +806,106 @@ async fn horizon_update(app: AppHandle) -> Result<Value, String> {
     .await
 }
 
+/// La musique en cours (Spotify, Deezer, navigateur…). `known` : la pochette déjà affichée.
+#[tauri::command]
+async fn now_playing(app: String, known: String) -> Result<Value, String> {
+    blocking(move || media::now_playing(&app, &known)).await
+}
+
+#[tauri::command]
+async fn media_control(app: String, action: String) -> Result<(), String> {
+    blocking(move || media::control(&app, &action)).await
+}
+
+fn media_dir() -> PathBuf {
+    config::data_dir().join("media")
+}
+
+/// Enregistre une vidéo, une image ou un son choisi par le joueur (corps binaire de la requête,
+/// `x-kind` et `x-name` en en-têtes) dans `media/`, et renvoie son chemin.
+#[tauri::command]
+async fn save_media(request: tauri::ipc::Request<'_>) -> Result<String, String> {
+    let header = |k: &str| request.headers().get(k).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
+    let kind = header("x-kind");
+    let name = net::dec(&header("x-name")).to_lowercase();
+    let tauri::ipc::InvokeBody::Raw(data) = request.body() else {
+        return Err("Fichier manquant".into());
+    };
+    let ext = name.rsplit('.').next().unwrap_or("").to_string();
+    let allowed: &[&str] = match kind.as_str() {
+        "video" | "intro" => &["mp4", "webm", "m4v", "mov"],
+        "image" => &["png", "jpg", "jpeg", "webp", "gif"],
+        "audio" => &["mp3", "ogg", "wav", "m4a", "flac", "mp4", "webm"],
+        _ => return Err("Type de fichier inconnu".into()),
+    };
+    if !allowed.contains(&ext.as_str()) {
+        return Err(format!("Format non pris en charge : .{ext} (acceptés : {})", allowed.join(", ")));
+    }
+    if data.len() > 600 * 1024 * 1024 {
+        return Err("Fichier trop lourd (600 Mo au maximum).".into());
+    }
+    let data = data.clone();
+    blocking(move || {
+        let dir = media_dir();
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+        // Un seul fichier par usage : le précédent est remplacé.
+        for entry in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
+            if entry.file_name().to_string_lossy().starts_with(&format!("{kind}-")) {
+                let _ = std::fs::remove_file(entry.path());
+            }
+        }
+        let path = dir.join(format!("{kind}-{}.{ext}", config::new_id()));
+        files::write_file(&path, &data)?;
+        Ok(path.to_string_lossy().into_owned())
+    })
+    .await
+}
+
+#[tauri::command]
+fn remove_media(kind: String) -> Result<(), String> {
+    for entry in std::fs::read_dir(media_dir()).into_iter().flatten().flatten() {
+        if entry.file_name().to_string_lossy().starts_with(&format!("{kind}-")) {
+            std::fs::remove_file(entry.path()).map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+/// Le Pack Leaf Client : performances, freelook, zoom et HUD déplaçable, depuis Modrinth.
+const CLIENT_PACK: [(&str, &str); 10] = [
+    ("sodium", "Sodium"),
+    ("lithium", "Lithium"),
+    ("ferrite-core", "FerriteCore"),
+    ("immediatelyfast", "ImmediatelyFast"),
+    ("entityculling", "Entity Culling"),
+    ("freelook", "Freelook"),
+    ("zoomify", "Zoomify"),
+    ("evergreenhud", "EvergreenHUD"),
+    ("modmenu", "Mod Menu"),
+    ("appleskin", "AppleSkin"),
+];
+
+#[tauri::command]
+async fn client_pack(app: AppHandle, instance: String) -> Result<Value, String> {
+    blocking(move || {
+        let inst = instance_by_id(&instance)?;
+        if !matches!(inst.loader.as_str(), "fabric" | "quilt") {
+            return Err("Le Pack Leaf Client demande une instance Fabric ou Quilt.".into());
+        }
+        let (mut installed, mut missing) = (Vec::new(), Vec::new());
+        for (i, (slug, name)) in CLIENT_PACK.iter().enumerate() {
+            let _ = app.emit("modpack-progress", json!({ "stage": format!("Pack Leaf Client : {name}"), "done": i, "total": CLIENT_PACK.len() }));
+            match modrinth::install(&inst, slug, None, "mod") {
+                Ok(names) => installed.extend(names),
+                Err(e) => missing.push(json!({ "name": name, "error": e })),
+            }
+        }
+        let _ = app.emit("modpack-progress", json!({ "stage": "Pack Leaf Client", "done": CLIENT_PACK.len(), "total": CLIENT_PACK.len() }));
+        Ok(json!({ "installed": installed, "missing": missing }))
+    })
+    .await
+}
+
 const NOTES: &str = "https://launchercontent.mojang.com/v2/javaPatchNotes.json";
 const CONTENT: &str = "https://launchercontent.mojang.com/v2/";
 
@@ -906,8 +1007,16 @@ fn main() {
             modrinth_remove,
             modrinth_modpack,
             horizon_update,
+            now_playing,
+            media_control,
+            save_media,
+            remove_media,
+            client_pack,
         ])
-        .setup(|_| {
+        .setup(|app| {
+            // Les vidéos, images et sons du joueur sont lus par le protocole asset, dans media/ seulement.
+            let _ = std::fs::create_dir_all(media_dir());
+            let _ = app.asset_protocol_scope().allow_directory(media_dir(), false);
             let settings = config::settings();
             discord::configure(discord_config(&settings));
             idle_presence(&settings);
@@ -1022,5 +1131,33 @@ mod content_tests {
         assert!(config::instance_dir(&instance.id).join("mods").join(file).is_file());
         modrinth::remove(&instance.id, "AANobbMI", "mod").unwrap();
         assert!(!config::instance_dir(&instance.id).join("mods").join(file).is_file());
+    }
+}
+
+#[cfg(test)]
+mod pack_tests {
+    use super::*;
+
+    /// Installe le Pack Leaf Client dans l'instance de test de `real_launch` (même id), pour
+    /// lancer ensuite le jeu avec ces mods. `cargo test --release -- --ignored --nocapture client_pack_install`
+    #[test]
+    #[ignore]
+    fn client_pack_install() {
+        let version = std::env::var("LEAF_TEST_VERSION").unwrap_or("26.3".into());
+        let instance = Instance {
+            id: format!("test-fabric-{version}"),
+            name: "Test".into(),
+            version,
+            loader: "fabric".into(),
+            ..Default::default()
+        };
+        for (slug, name) in CLIENT_PACK {
+            match modrinth::install(&instance, slug, None, "mod") {
+                Ok(done) => println!("✓ {name} : {done:?}"),
+                Err(e) => println!("✗ {name} : {e}"),
+            }
+        }
+        let record = modrinth::installed(&instance.id);
+        println!("{} fichiers suivis", record.as_object().map(|m| m.len()).unwrap_or(0));
     }
 }

@@ -617,3 +617,64 @@ input[type=color]::-webkit-color-swatch { border: 0; border-radius: calc(7px * v
 .lic-item b small { font: 500 11px var(--mono); color: var(--text-3); }
 .lic-item span { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lic-item em { font: 600 11px var(--mono); font-style: normal; color: var(--accent); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ───────── Fond vidéo et intro ───────── */
+#bgVideo { position: fixed; inset: -30px; width: calc(100% + 60px); height: calc(100% + 60px); object-fit: cover; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1s var(--ease-out); }
+#bgVideo.on { opacity: 1; }
+#intro { position: fixed; inset: 0; z-index: 150; background: #000; display: grid; place-items: center; animation: fade .4s; }
+#intro[hidden] { display: none; }
+#intro video { width: 100%; height: 100%; object-fit: cover; }
+#intro #introSkip { position: absolute; right: 28px; bottom: 28px; background: rgba(0,0,0,.45); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.2); opacity: 0; animation: fade .6s 1.2s forwards; }
+#intro.out { animation: intro-out .7s var(--ease-in-out) forwards; }
+@keyframes intro-out { to { opacity: 0; transform: scale(1.06); filter: blur(10px); } }
+
+/* ───────── Musique en cours ───────── */
+.np-mini { display: flex; align-items: center; gap: 10px; height: 30px; max-width: 360px; padding: 0 4px 0 4px; border-radius: 99px; background: var(--panel-2); border: 1px solid var(--line-2); cursor: pointer; animation: rise .5s var(--ease-spring); transition: border-color .25s; }
+.np-mini:hover { border-color: rgba(var(--accent-rgb), .45); }
+.np-mini[hidden] { display: none; }
+.np-cover { object-fit: cover; flex: none; background: rgba(255,255,255,.06); display: grid; place-items: center; color: var(--text-3); }
+.np-cover svg { width: 55%; height: 55%; }
+.np-cover.sm { width: 22px; height: 22px; border-radius: 50%; }
+.np-mini.playing .np-cover.sm { animation: spin 6s linear infinite; }
+.np-cover.lg { width: 92px; height: 92px; border-radius: calc(14px * var(--rs, 1)); box-shadow: 0 14px 30px -10px rgba(0,0,0,.7); position: relative; }
+.np-cover.xl { width: 120px; height: 120px; border-radius: calc(16px * var(--rs, 1)); box-shadow: 0 20px 40px -12px rgba(0,0,0,.7); }
+.np-mini-txt { min-width: 0; max-width: 190px; line-height: 1.15; }
+.np-mini-txt b { display: block; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-mini-txt span { display: block; font-size: 10.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-ctl { display: flex; align-items: center; gap: 2px; }
+.np-ctl button { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: var(--text-2); transition: color .2s, background .2s, transform .3s var(--ease-spring); }
+.np-ctl button svg { width: 12px; height: 12px; }
+.np-ctl button:hover { color: var(--text); background: rgba(255,255,255,.08); }
+.np-ctl button.main { color: #04140b; background: var(--accent); }
+.np-ctl button.main:hover { background: var(--accent-3); }
+.np-ctl button.pressed { transform: scale(.82); }
+.np-card { position: relative; overflow: hidden; display: flex; align-items: center; gap: 20px; padding: 18px 22px; margin-top: 16px; isolation: isolate; animation: rise .6s var(--ease-out); }
+.np-card[hidden] { display: none; }
+.np-card .np-bg { position: absolute; inset: -40px; z-index: -1; background: center / cover; filter: blur(40px) saturate(1.6); opacity: .35; transition: background-image .6s; }
+.np-info { flex: 1; min-width: 0; }
+.np-info h3 { font: 700 20px var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.np-info p { color: var(--text-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-card .np-ctl button, .np-panel-top + .np-bar + .np-row .np-ctl button { width: 38px; height: 38px; }
+.np-card .np-ctl button svg { width: 16px; height: 16px; }
+.np-card .np-ctl button.main { width: 46px; height: 46px; box-shadow: 0 8px 24px -8px rgba(var(--accent-rgb), .9); }
+.np-bar { height: 5px; border-radius: 5px; background: rgba(255,255,255,.1); overflow: hidden; margin: 12px 0 8px; }
+.np-bar.big { height: 7px; margin-top: 22px; }
+.np-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--accent-2), var(--accent)); box-shadow: 0 0 12px rgba(var(--accent-rgb), .6); transition: width .25s linear; }
+.np-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.np-time { font: 500 11.5px var(--mono); color: var(--text-3); }
+.np-eq { display: flex; align-items: flex-end; gap: 3px; height: 26px; align-self: flex-start; }
+.np-eq i { width: 4px; height: 6px; border-radius: 2px; background: var(--accent); opacity: .5; }
+.np-eq.on i { animation: eq .9s var(--ease-in-out) infinite alternate; opacity: 1; }
+.np-eq.on i:nth-child(2) { animation-delay: .2s; } .np-eq.on i:nth-child(3) { animation-delay: .45s; } .np-eq.on i:nth-child(4) { animation-delay: .1s; }
+@keyframes eq { from { height: 4px; } to { height: 26px; } }
+.np-panel-top { display: flex; gap: 20px; align-items: center; }
+.np-panel-top h2 { font: 700 22px var(--display); margin-top: 4px; }
+.np-panel-top + .np-bar + .np-row .np-ctl button { width: 40px; height: 40px; }
+.np-panel-top + .np-bar + .np-row .np-ctl button svg { width: 16px; height: 16px; }
+
+/* ───────── Pack Leaf Client ───────── */
+.pack-card { display: flex; align-items: center; gap: 18px; padding: 18px 22px; margin-bottom: 16px; border-color: rgba(var(--accent-rgb), .3); background: linear-gradient(120deg, rgba(var(--accent-rgb), .12), transparent 60%), var(--panel); }
+.pack-card h3 { font: 650 16px var(--display); margin: 2px 0 4px; }
+.pack-card p { font-size: 12.5px; max-width: 640px; }
+.pack-ico { width: 52px; height: 52px; border-radius: calc(16px * var(--rs, 1)); display: grid; place-items: center; background: rgba(var(--accent-rgb), .15); color: var(--accent); flex: none; }
+.pack-ico svg { width: 26px; height: 26px; }

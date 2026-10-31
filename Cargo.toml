@@ -1,6 +1,6 @@
 [package]
 name = "leaf-launcher"
-version = "1.2.1"
+version = "1.3.0"
 edition = "2021"
 license = "MIT"
 description = "Un launcher Minecraft: Java Edition en Rust, bâti sur la base du launcher Horizon"
@@ -9,7 +9,7 @@ description = "Un launcher Minecraft: Java Edition en Rust, bâti sur la base du
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["protocol-asset"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # TLS par Schannel sous Windows : aucune dépendance C à compiler.
@@ -30,6 +30,8 @@ sysinfo = { version = "0.32", default-features = false, features = ["system"] }
 # Le tube IPC de Discord (CreateFileW) et les jetons Microsoft chiffrés par DPAPI.
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Storage_FileSystem", "Win32_Security_Cryptography"] }
+# La musique en cours (contrôles multimédias de Windows) : déjà dans le lockfile par Tauri.
+windows = { version = "0.62", features = ["Media_Control", "Storage_Streams", "Foundation", "Foundation_Collections"] }
 
 [features]
 default = ["custom-protocol"]

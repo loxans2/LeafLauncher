@@ -144,11 +144,29 @@ fn install_one(
             relative(v)?;
             net::get_json(&format!("{API}/version/{}", enc(v)))?
         }
-        None => versions(project_id, &instance.version, &instance.loader, kind)?
-            .into_iter()
-            .next()
-            .ok_or_else(|| format!("Pas de version pour Minecraft {} ({}).", instance.version, instance.loader))?,
+        None => {
+            let list = versions(project_id, &instance.version, &instance.loader, kind)?;
+            if list.is_empty() {
+                return Err(format!("Pas de version pour Minecraft {} ({}).", instance.version, instance.loader));
+            }
+            // La plus récente d'abord ; si l'une de ses dépendances manque (une version « universelle »
+            // peut en demander une d'un autre loader), les deux précédentes.
+            let mut last = String::new();
+            for candidate in list.iter().take(3) {
+                seen.remove(project_id);
+                match install_one(instance, project_id, candidate["id"].as_str(), kind, seen, done, depth) {
+                    Ok(()) => return Ok(()),
+                    Err(e) => last = e,
+                }
+            }
+            return Err(last);
+        }
     };
+    // Un slug (« sodium ») et l'ID du projet désignent le même mod : on range par ID.
+    let key = version["project_id"].as_str().unwrap_or(project_id).to_string();
+    if depth > 0 && record.get(&key).is_some() {
+        return Ok(());
+    }
     let files = version["files"].as_array().cloned().unwrap_or_default();
     let file = files
         .iter()
@@ -157,14 +175,14 @@ fn install_one(
         .ok_or("Cette version n'a pas de fichier")?;
     let dir = config::instance_dir(&instance.id).join(folder(kind)?);
     // Une mise à jour remplace l'ancien fichier.
-    if let Some(old) = record[project_id]["file"].as_str() {
+    if let Some(old) = record[&key]["file"].as_str() {
         if Some(old) != file["filename"].as_str() {
             let _ = std::fs::remove_file(dir.join(old));
         }
     }
     let name = fetch_file(file, &dir)?;
     let title = project(project_id).ok().and_then(|p| p["title"].as_str().map(String::from)).unwrap_or(name.clone());
-    record[project_id] = json!({
+    record[&key] = json!({
         "file": name,
         "kind": kind,
         "title": title,
@@ -173,12 +191,27 @@ fn install_one(
         "dependency": depth > 0,
     });
     save_installed(&instance.id, &record)?;
-    done.push(title);
+    done.push(title.clone());
     if kind == "mod" {
         for dep in version["dependencies"].as_array().into_iter().flatten() {
             if dep["dependency_type"] == "required" {
                 if let Some(id) = dep["project_id"].as_str() {
-                    install_one(instance, id, None, "mod", seen, done, depth + 1)?;
+                    if let Err(e) = install_one(instance, id, None, "mod", seen, done, depth + 1) {
+                        // Sans sa dépendance, le mod ferait planter le jeu : on le retire.
+                        let _ = std::fs::remove_file(dir.join(&name));
+                        let mut record = installed(&instance.id);
+                        if let Some(map) = record.as_object_mut() {
+                            map.remove(&key);
+                        }
+                        save_installed(&instance.id, &record)?;
+                        done.retain(|t| t != &title);
+                        let dep_name = project(id).ok().and_then(|p| p["title"].as_str().map(String::from)).unwrap_or(id.to_string());
+                        return Err(if e.starts_with("Pas de version") {
+                            format!("{title} demande {dep_name}, qui n'existe pas encore pour Minecraft {} ({}).", instance.version, instance.loader)
+                        } else {
+                            format!("{title} : {e}")
+                        });
+                    }
                 }
             }
         }

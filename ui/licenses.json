@@ -1,7 +1,7 @@
 {
-  "version": "1.2.1",
+  "version": "1.3.0",
   "generated": "Généré depuis le graphe de dépendances du build (cargo metadata), pas une liste écrite à la main.",
-  "total": 252,
+  "total": 253,
   "groups": [
     {
       "id": "core",
@@ -84,6 +84,13 @@
           "author": "Martin Algesten, Jacob Hoffman-Andrews",
           "license": "MIT OR Apache-2.0",
           "url": "https://github.com/algesten/ureq"
+        },
+        {
+          "name": "windows",
+          "version": "0.62.2",
+          "author": "",
+          "license": "MIT OR Apache-2.0",
+          "url": "https://github.com/microsoft/windows-rs"
         },
         {
           "name": "windows-sys",
@@ -746,6 +753,13 @@
           "author": "Alex Crichton, Carl Lerche",
           "license": "MIT OR Apache-2.0",
           "url": "https://github.com/hyperium/http"
+        },
+        {
+          "name": "http-range",
+          "version": "0.1.6",
+          "author": "Luka Zakrajšek",
+          "license": "MIT",
+          "url": "https://github.com/bancek/rust-http-range.git"
         },
         {
           "name": "ico",
@@ -1682,13 +1696,6 @@
           "name": "windows",
           "version": "0.57.0",
           "author": "Microsoft",
-          "license": "MIT OR Apache-2.0",
-          "url": "https://github.com/microsoft/windows-rs"
-        },
-        {
-          "name": "windows",
-          "version": "0.62.2",
-          "author": "",
           "license": "MIT OR Apache-2.0",
           "url": "https://github.com/microsoft/windows-rs"
         },

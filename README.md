@@ -39,6 +39,15 @@ contenir des bugs.
 - **Thèmes** : 12 préréglages, toutes les couleurs, un fond en aurore, dégradé, image ou particules,
   les polices, les arrondis, la taille de l'interface… Les thèmes s'exportent et se partagent.
 - **Discord Rich Presence**, avec ton serveur mis en avant.
+- **Ta musique dans le launcher** : titre, pochette et contrôles (lecture, suivant, précédent) de ce
+  que tu écoutes sur Spotify, Liner, Deezer, Apple Music, YouTube… via les contrôles multimédias de
+  Windows, sans clé ni connexion.
+- **Tes edits en fond** : une vidéo de fond (image + son, image seule ou son seul), une intro au
+  lancement et une musique de fond, à partir de tes propres fichiers, tout réglable (volume,
+  vitesse, flou, assombrissement…).
+- **Pack Leaf Client** : en un clic sur une instance Fabric ou Quilt, Freelook, Zoomify, un HUD
+  modifiable en jeu (EvergreenHUD : FPS, CPS, keystrokes) et des mods de performance (Sodium,
+  Lithium, FerriteCore…).
 - **Sécurisé** : jetons chiffrés par Windows, fichiers vérifiés par hash, aucune télémétrie
   ([SECURITY.md](SECURITY.md)).
 
