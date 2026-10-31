@@ -1,0 +1,46 @@
+name: Build
+
+# Compile le launcher pour Windows à chaque push, et publie une release pour chaque tag v*.
+# La connexion Microsoft vient de la variable du dépôt LEAF_MSA_CLIENT_ID (Settings > Secrets and
+# variables > Actions > Variables) : le client ID d'une application Azure autorisée par Mojang.
+# Ce n'est pas un secret (tous les launchers publient le leur), mais il reste hors du code.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Tests
+        run: cargo test --release
+      - name: Build
+        env:
+          LEAF_MSA_CLIENT_ID: ${{ vars.LEAF_MSA_CLIENT_ID }}
+        run: cargo build --release
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item target/release/leaf-launcher.exe dist/LeafLauncher.exe
+          if (Test-Path target/release/WebView2Loader.dll) { Copy-Item target/release/WebView2Loader.dll dist/ }
+          Copy-Item README.md, LICENSE, LICENSE-HORIZON dist/
+          Compress-Archive -Path dist/* -DestinationPath LeafLauncher-windows-x64.zip -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LeafLauncher-windows-x64
+          path: LeafLauncher-windows-x64.zip
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: LeafLauncher-windows-x64.zip
+          generate_release_notes: true

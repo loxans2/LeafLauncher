@@ -1,0 +1,17 @@
+# Builds
+/target
+/gen
+node_modules/
+
+# Données locales du launcher (mode portable, tests) : jamais dans le dépôt
+/data
+/portable
+*.log
+
+# Secrets et réglages locaux
+.env
+.env.*
+*.pem
+*.key
+accounts.json
+settings.json

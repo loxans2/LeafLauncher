@@ -1,0 +1,41 @@
+[package]
+name = "leaf-launcher"
+version = "1.2.0"
+edition = "2021"
+license = "MIT"
+description = "Un launcher Minecraft: Java Edition en Rust, bâti sur la base du launcher Horizon"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# TLS par Schannel sous Windows : aucune dépendance C à compiler.
+ureq = { version = "2", default-features = false, features = ["json", "native-tls"] }
+native-tls = "0.2"
+sha1 = "0.10"
+# sha512 des fichiers Modrinth, sha256 des builds Horizon et PKCE.
+sha2 = "0.10"
+# Le vérificateur PKCE et l'état de la connexion Microsoft par le navigateur.
+getrandom = "0.2"
+# L'UUID d'un compte hors ligne, comme le serveur vanilla le calcule.
+md-5 = "0.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+dirs = "5"
+# La mémoire de l'ordinateur, pour la limite du curseur de RAM.
+sysinfo = { version = "0.32", default-features = false, features = ["system"] }
+
+# Le tube IPC de Discord (CreateFileW) et les jetons Microsoft chiffrés par DPAPI.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Storage_FileSystem", "Win32_Security_Cryptography"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+strip = true
+lto = "thin"
+codegen-units = 4
